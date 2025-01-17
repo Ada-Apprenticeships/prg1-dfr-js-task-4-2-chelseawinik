@@ -92,7 +92,26 @@ function flatten(dataframe) {
 
 // Load a CSV file into a dataframe
 function loadCSV(csvFile, ignoreRows = [], ignoreCols = []) {
-  
+  if (!fileExists(csvFile)) return [[], -1, -1]; // File does not exist
+
+  // Read the file and split into rows
+  const fileContent = fs.readFileSync(csvFile, "utf-8");
+  const rows = fileContent.split("\n").filter((row) => row.trim() !== ""); // Remove empty rows
+
+  const totalRows = rows.length; // Total rows in the file
+  const totalColumns = rows[0].split(",").length; // Total columns in the file
+
+  // Process the rows and columns
+  const data = rows
+    .filter((_, index) => !ignoreRows.includes(index)) // Filter ignored rows
+    .map((row) =>
+      row
+        .split(",")
+        .filter((_, index) => !ignoreCols.includes(index)) // Filter ignored columns
+        .map((cell) => cell.trim()) // Trim whitespace from cells
+    );
+
+  return [data, totalRows, totalColumns]; // Return the processed data
 }
 
 // Create a slice of a dataframe based on a pattern in a specific column
